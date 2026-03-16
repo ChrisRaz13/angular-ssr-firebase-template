@@ -1,20 +1,28 @@
 import 'zone.js/node';
-import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule, writeResponseToNodeResponse } from '@angular/ssr/node';
+import { renderApplication } from '@angular/platform-server';
+import { APP_BASE_HREF } from '@angular/common';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
 import compression from 'compression';
+import bootstrap from './main.server';
+
+// ── Resolve paths at module-load time (no engine manifest needed) ────
+const serverDistFolder  = dirname(fileURLToPath(import.meta.url));
+const browserDistFolder = resolve(serverDistFolder, '../browser');
+const indexHtml         = join(browserDistFolder, 'index.html');
+
+// Cache the index template once — it never changes between requests
+const documentTemplate = readFileSync(indexHtml, 'utf-8');
 
 export function app(): express.Express {
-  const server              = express();
-  const serverDistFolder    = dirname(fileURLToPath(import.meta.url));
-  const browserDistFolder   = resolve(serverDistFolder, '../browser');
-  const angularAppEngine    = new AngularNodeAppEngine();
+  const server = express();
 
-  // ── Gzip / Brotli compression ───────────────────────────────
+  // ── Gzip / Brotli compression ───────────────────────────────────
   server.use(compression());
 
-  // ── Security headers ────────────────────────────────────────
+  // ── Security headers ────────────────────────────────────────────
   server.use((_req, res, next) => {
     res.setHeader('X-Content-Type-Options',    'nosniff');
     res.setHeader('X-Frame-Options',           'DENY');
@@ -22,7 +30,7 @@ export function app(): express.Express {
     res.setHeader('Referrer-Policy',           'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy',        'camera=(), microphone=(), geolocation=()');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-    // TODO: Tighten CSP once you have finalised all third-party scripts
+    // TODO: tighten CSP once all third-party scripts are finalised
     res.setHeader('Content-Security-Policy',
       "default-src 'self'; " +
       "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com https://js.hsforms.net https://www.google.com; " +
@@ -36,8 +44,8 @@ export function app(): express.Express {
     next();
   });
 
-  // ── Static assets — 1-year immutable cache ───────────────────
-  server.get('*.*', express.static(browserDistFolder, {
+  // ── Static assets — 1-year immutable cache ──────────────────────
+  server.get('**', express.static(browserDistFolder, {
     maxAge: '1y',
     immutable: true,
     setHeaders: (res, filePath: string) => {
@@ -47,44 +55,33 @@ export function app(): express.Express {
     }
   }));
 
-  // ── All other routes → Angular Universal SSR ────────────────
-  server.use('**', createNodeRequestHandler(async (req, res, next) => {
-    try {
-      const response = await angularAppEngine.handle(req);
-      if (response) {
+  // ── All other routes → Angular SSR via renderApplication ────────
+  // Uses @angular/platform-server directly — no engine-manifest needed.
+  server.get('**', (req, res, next) => {
+    const { protocol, originalUrl, baseUrl, headers } = req;
+
+    renderApplication(bootstrap, {
+      document: documentTemplate,
+      url: `${protocol}://${headers.host}${originalUrl}`,
+      platformProviders: [
+        { provide: APP_BASE_HREF, useValue: baseUrl },
+      ],
+    })
+      .then((html: string) => {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        await writeResponseToNodeResponse(response, res);
-      } else {
-        next();
-      }
-    } catch (err) {
-      next(err);
-    }
-  }));
+        res.send(html);
+      })
+      .catch((err: unknown) => next(err));
+  });
 
   return server;
 }
 
-const server = app();
-
-// Always start listening — required for Firebase App Hosting / Cloud Run.
-// isMainModule() returns false when the adapter bundles the server, so
-// we bind unconditionally and rely on process.env.PORT (set to 8080 by Cloud Run).
+// ── Start server ─────────────────────────────────────────────────────
+// Always listen unconditionally — Firebase App Hosting imports this module
+// (it is NOT the main Node.js entry point), so isMainModule() returns false.
+// Cloud Run provides PORT=8080.
 const port = process.env['PORT'] || 4000;
-server.listen(port, () => {
+app().listen(port, () => {
   console.log(`Node Express server listening on http://localhost:${port}`);
-});
-
-export default createNodeRequestHandler(async (req, res, next) => {
-  const angularAppEngine = new AngularNodeAppEngine();
-  try {
-    const response = await angularAppEngine.handle(req);
-    if (response) {
-      await writeResponseToNodeResponse(response, res);
-    } else {
-      next();
-    }
-  } catch (err) {
-    next(err);
-  }
 });
