@@ -67,12 +67,13 @@ export function app(): express.Express {
 
 const server = app();
 
-if (isMainModule(import.meta.url)) {
-  const port = process.env['PORT'] || 4000;
-  server.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
-  });
-}
+// Always start listening — required for Firebase App Hosting / Cloud Run.
+// isMainModule() returns false when the adapter bundles the server, so
+// we bind unconditionally and rely on process.env.PORT (set to 8080 by Cloud Run).
+const port = process.env['PORT'] || 4000;
+server.listen(port, () => {
+  console.log(`Node Express server listening on http://localhost:${port}`);
+});
 
 export default createNodeRequestHandler(async (req, res, next) => {
   const angularAppEngine = new AngularNodeAppEngine();
