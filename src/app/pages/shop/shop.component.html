@@ -30,7 +30,7 @@
     <span class="gs-quiz-banner-icon">{{ skinMeta[quizSkinType()!].emoji }}</span>
     <span>Showing results for your <strong>{{ skinMeta[quizSkinType()!].label }}</strong> skin type</span>
     <button class="gs-quiz-clear-btn" (click)="setSkinType('all')">Show All</button>
-    <button class="gs-quiz-dismiss-btn" (click)="dismissBanner()">×</button>
+    <button class="gs-quiz-dismiss-btn" aria-label="Dismiss skin type banner" (click)="dismissBanner()">×</button>
   </div>
 </div>
 
@@ -53,7 +53,7 @@
         [ngModel]="searchQuery()"
         (ngModelChange)="onSearch($event)"
       />
-      <button class="gs-search-clear" *ngIf="searchQuery()" (click)="onSearch('')">×</button>
+      <button class="gs-search-clear" aria-label="Clear search" *ngIf="searchQuery()" (click)="onSearch('')">×</button>
     </div>
 
     <!-- Results count -->
@@ -77,7 +77,7 @@
   <div class="gs-active-chips" *ngIf="hasActiveFilters()">
     <span class="gs-chip" *ngFor="let chip of activeFilters()">
       {{ chip.label }}
-      <button class="gs-chip-remove" (click)="removeFilter(chip.key)">×</button>
+      <button class="gs-chip-remove" [attr.aria-label]="'Remove ' + chip.label + ' filter'" (click)="removeFilter(chip.key)">×</button>
     </span>
     <button class="gs-clear-all-btn" (click)="clearAllFilters()">Clear All</button>
   </div>
@@ -93,7 +93,7 @@
   <aside class="gs-sidebar" [class.open]="sidebarOpen()">
     <div class="gs-sidebar-header">
       <span class="gs-sidebar-title">Filters</span>
-      <button class="gs-sidebar-close" (click)="closeSidebar()">×</button>
+      <button class="gs-sidebar-close" aria-label="Close filters" (click)="closeSidebar()">×</button>
     </div>
 
     <!-- Category section -->
@@ -257,7 +257,7 @@
               #cardBundleBtn
               [class.added]="bundleProductId() === p.id"
               (click)="addToBundle(p, cardBundleBtn)"
-              title="Add to Bundle"
+              [attr.aria-label]="'Add ' + p.name + ' to Bundle'"
             >
               🧴
             </button>
