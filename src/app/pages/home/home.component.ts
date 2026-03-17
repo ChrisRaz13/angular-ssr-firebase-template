@@ -1,9 +1,9 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, Inject, PLATFORM_ID, ElementRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Meta } from '@angular/platform-browser';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SeoService } from '../../services/seo.service';
 
 interface OyProduct {
   rank: number;
@@ -30,9 +30,12 @@ interface OyProduct {
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private gsapCtx: any;
+  private heroMouseMove!: (e: MouseEvent) => void;
+  private heroMouseLeave!: () => void;
+  private heroEl!: HTMLElement;
 
   constructor(
-    private meta: Meta,
+    private seoService: SeoService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private el: ElementRef
   ) {}
@@ -129,7 +132,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow' });
+    this.seoService.setPageSEO('home');
     if (isPlatformBrowser(this.platformId)) {
       gsap.registerPlugin(ScrollTrigger);
       window.scrollTo(0, 0);
@@ -144,41 +147,310 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private initAnimations(): void {
     this.gsapCtx = gsap.context(() => {
 
-      // ── Hero ──────────────────────────────────────────────
-      const herTl = gsap.timeline({ delay: 0.1 });
-      herTl
-        .from('.gs-live-badge', { opacity: 0, y: -24, duration: 0.5, ease: 'power2.out' })
-        .from('.gs-hero-title .line', { opacity: 0, y: 48, duration: 0.75, stagger: 0.18, ease: 'power3.out' }, '-=0.1')
-        .from('.gs-hero-sub', { opacity: 0, y: 20, duration: 0.55 }, '-=0.2')
-        .from('.gs-hero-ctas', { opacity: 0, y: 16, duration: 0.45 }, '-=0.1')
-        .from('.gs-hero-img-wrap', { opacity: 0, x: 60, duration: 0.8, ease: 'power2.out' }, 0.3)
-        .from('.gs-hero-rank-badge', { opacity: 0, scale: 0, duration: 0.5, ease: 'back.out(2)' }, 0.9)
-        .from('.gs-hero-stats span', { opacity: 0, y: 10, stagger: 0.12, duration: 0.4 }, 0.9);
+      // ─────────────────────────────────────────────────────
+      // 1. CINEMATIC HERO ENTRANCE
+      //    Sequenced like a luxury brand film — slow, measured,
+      //    each element blooms into place with silky easing.
+      // ─────────────────────────────────────────────────────
+      const heroTl = gsap.timeline({ delay: 0.15 });
 
-      // ── Marquee fade in ───────────────────────────────────
-      gsap.from('.gs-marquee-wrap', { opacity: 0, duration: 0.6, delay: 1.3 });
+      // Background glow blooms in (scale 1.06 → 1, fade up)
+      heroTl.from('.gs-hero-bg-glow', {
+        opacity: 0,
+        scale: 1.06,
+        duration: 1.6,
+        ease: 'power2.out',
+      });
 
-      // ── Section header ────────────────────────────────────
+      // Gold top line draws across left→right
+      heroTl.from('.gs-hero-topline', {
+        scaleX: 0,
+        transformOrigin: 'left center',
+        duration: 1.1,
+        ease: 'power3.out',
+      }, '-=1.1');
+
+      // Eyebrow row: line extends, then text + dot fade in
+      heroTl
+        .from('.gs-eyebrow-line', {
+          scaleX: 0,
+          transformOrigin: 'left center',
+          duration: 0.7,
+          ease: 'power3.out',
+        }, '-=0.5')
+        .from('.gs-eyebrow-text', {
+          opacity: 0, x: -16,
+          duration: 0.55,
+          ease: 'power2.out',
+        }, '-=0.35')
+        .from('.gs-live-dot', {
+          opacity: 0, scale: 0,
+          duration: 0.4,
+          ease: 'back.out(2.5)',
+        }, '-=0.25');
+
+      // Headline lines stagger — large, slow, elegant
+      heroTl.from('.gs-hero-title .line', {
+        opacity: 0,
+        y: 56,
+        duration: 0.9,
+        stagger: 0.2,
+        ease: 'power3.out',
+      }, '-=0.2');
+
+      // Subtext & CTAs
+      heroTl
+        .from('.gs-hero-sub', {
+          opacity: 0, y: 22,
+          duration: 0.7,
+          ease: 'power2.out',
+        }, '-=0.4')
+        .from('.gs-hero-ctas', {
+          opacity: 0, y: 16,
+          duration: 0.55,
+          ease: 'power2.out',
+        }, '-=0.3')
+        .from('.gs-trust-pill', {
+          opacity: 0, y: 12,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: 'power2.out',
+        }, '-=0.2');
+
+      // Product image: cinematic reveal from right, slight scale
+      heroTl.from('.gs-hero-img-wrap', {
+        opacity: 0,
+        x: 64,
+        scale: 0.94,
+        duration: 1.1,
+        ease: 'power3.out',
+      }, 0.6);
+
+      // Image glow bloom
+      heroTl.from('.gs-img-glow', {
+        opacity: 0,
+        scale: 0.7,
+        duration: 1.4,
+        ease: 'power2.out',
+      }, 1.0);
+
+      // Glassmorphism cards stagger in (like they're floating into frame)
+      heroTl
+        .to('.gs-glass-card--tl', {
+          opacity: 1, y: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+        }, '-=0.4')
+        .from('.gs-glass-card--tl', {
+          y: 24, x: -12,
+          duration: 0.8,
+          ease: 'power2.out',
+        }, '<')
+        .to('.gs-glass-card--br', {
+          opacity: 1, y: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+        }, '-=0.5')
+        .from('.gs-glass-card--br', {
+          y: -20, x: 12,
+          duration: 0.8,
+          ease: 'power2.out',
+        }, '<')
+        .to('.gs-glass-pill--tr', {
+          opacity: 1,
+          duration: 0.6,
+          ease: 'power2.out',
+        }, '-=0.55')
+        .from('.gs-glass-pill--tr', {
+          scale: 0.6, y: 10,
+          duration: 0.6,
+          ease: 'back.out(2)',
+        }, '<');
+
+      // Scroll cue fades in last
+      heroTl.to('.gs-scroll-cue', {
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power2.out',
+      }, '-=0.2');
+
+      // Marquee wrapper fades in
+      heroTl.from('.gs-marquee-wrap', {
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power2.out',
+      }, '-=0.6');
+
+      // ─────────────────────────────────────────────────────
+      // 2. SPARKLE PARTICLES — staggered fade + float up loop
+      // ─────────────────────────────────────────────────────
+      const particles = this.el.nativeElement.querySelectorAll('.gs-particle');
+      particles.forEach((el: HTMLElement, i: number) => {
+        // Staggered entrance
+        gsap.to(el, {
+          opacity: 0.6 + Math.random() * 0.35,
+          duration: 0.6 + Math.random() * 0.4,
+          delay: 1.2 + i * 0.15,
+          ease: 'power2.out',
+        });
+        // Continuous float loop — each particle has its own rhythm
+        gsap.to(el, {
+          y: -(20 + Math.random() * 30),
+          x: (Math.random() - 0.5) * 16,
+          opacity: 0,
+          duration: 3.5 + Math.random() * 2.5,
+          delay: 1.8 + i * 0.2,
+          repeat: -1,
+          repeatDelay: Math.random() * 1.5,
+          ease: 'power1.inOut',
+          yoyo: false,
+        });
+      });
+
+      // ─────────────────────────────────────────────────────
+      // 3. CONTINUOUS FLOAT — product image gentle bob
+      // ─────────────────────────────────────────────────────
+      gsap.to('.gs-hero-img-float', {
+        y: -16,
+        duration: 4.2,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+        delay: 1.4,
+      });
+
+      // ─────────────────────────────────────────────────────
+      // 4. GLASSMORPHISM CARDS — subtle float (opposite phase)
+      // ─────────────────────────────────────────────────────
+      gsap.to('.gs-glass-card--tl', {
+        y: -8, duration: 3.8,
+        yoyo: true, repeat: -1,
+        ease: 'sine.inOut', delay: 1.8,
+      });
+      gsap.to('.gs-glass-card--br', {
+        y: 8, duration: 4.6,
+        yoyo: true, repeat: -1,
+        ease: 'sine.inOut', delay: 2.2,
+      });
+      gsap.to('.gs-glass-pill--tr', {
+        y: -5, duration: 3.2,
+        yoyo: true, repeat: -1,
+        ease: 'sine.inOut', delay: 2.0,
+      });
+
+      // ─────────────────────────────────────────────────────
+      // 5. MOUSEMOVE PARALLAX — product tracks cursor elegantly
+      // ─────────────────────────────────────────────────────
+      this.heroEl = this.el.nativeElement.querySelector('.gs-hero');
+
+      this.heroMouseMove = (e: MouseEvent) => {
+        const rect = this.heroEl.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width  - 0.5;
+        const y = (e.clientY - rect.top)  / rect.height - 0.5;
+
+        // Background glow shifts opposite direction (depth illusion)
+        gsap.to('.gs-hero-bg-glow', {
+          x: x * -24, y: y * -16,
+          duration: 1.4, ease: 'power2.out', overwrite: 'auto',
+        });
+        // Product image: main parallax movement
+        gsap.to('.gs-hero-img-parallax', {
+          x: x * 22, y: y * 14,
+          duration: 0.9, ease: 'power2.out', overwrite: 'auto',
+        });
+        // Glass cards: slightly more movement (feels closer to viewer)
+        gsap.to(['.gs-glass-card--tl', '.gs-glass-pill--tr'], {
+          x: x * 30, y: y * 18,
+          duration: 0.75, ease: 'power2.out', overwrite: 'auto',
+        });
+        gsap.to('.gs-glass-card--br', {
+          x: x * 26, y: y * 16,
+          duration: 0.85, ease: 'power2.out', overwrite: 'auto',
+        });
+      };
+
+      this.heroMouseLeave = () => {
+        gsap.to([
+          '.gs-hero-bg-glow',
+          '.gs-hero-img-parallax',
+          '.gs-glass-card--tl',
+          '.gs-glass-card--br',
+          '.gs-glass-pill--tr',
+        ], {
+          x: 0, y: 0,
+          duration: 1.1, ease: 'power2.out', stagger: 0.04,
+        });
+      };
+
+      this.heroEl.addEventListener('mousemove', this.heroMouseMove);
+      this.heroEl.addEventListener('mouseleave', this.heroMouseLeave);
+
+      // ─────────────────────────────────────────────────────
+      // 6. SCROLL PARALLAX — product rises on scroll
+      // ─────────────────────────────────────────────────────
+      gsap.to('.gs-hero-img-parallax', {
+        yPercent: -20,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.gs-hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 2,
+        },
+      });
+
+      // Scroll cue fades out on scroll
+      gsap.to('.gs-scroll-cue', {
+        opacity: 0,
+        y: 12,
+        ease: 'power2.in',
+        scrollTrigger: {
+          trigger: '.gs-hero',
+          start: 'top top',
+          end: '12% top',
+          scrub: true,
+        },
+      });
+
+      // ─────────────────────────────────────────────────────
+      // 7. BELOW-FOLD SECTION ANIMATIONS (ScrollTrigger)
+      // ─────────────────────────────────────────────────────
+
+      // Section headers
       ScrollTrigger.create({
         trigger: '.gs-rankings-section',
         start: 'top 80%',
         onEnter: () => {
           gsap.from('.gs-section-eyebrow, .gs-section-h2, .gs-section-sub', {
-            opacity: 0, y: 30, duration: 0.6, stagger: 0.12, ease: 'power2.out'
+            opacity: 0, y: 30,
+            duration: 0.7, stagger: 0.14,
+            ease: 'power2.out',
           });
         },
-        once: true
+        once: true,
       });
 
-      // ── Product cards stagger ─────────────────────────────
+      // Product cards — stagger in with subtle scale
       ScrollTrigger.batch('.gs-prod-card', {
         onEnter: (els) => {
           gsap.from(els, {
-            opacity: 0,
-            y: 55,
-            scale: 0.96,
-            duration: 0.65,
-            stagger: 0.08,
+            opacity: 0, y: 50,
+            scale: 0.97,
+            duration: 0.7,
+            stagger: 0.07,
+            ease: 'power2.out',
+          });
+        },
+        start: 'top 90%',
+        once: true,
+      });
+
+      // Trust items
+      ScrollTrigger.batch('.gs-trust-item', {
+        onEnter: (els) => {
+          gsap.from(els, {
+            opacity: 0, y: 28,
+            duration: 0.6, stagger: 0.1,
             ease: 'power2.out',
           });
         },
@@ -186,23 +458,35 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         once: true,
       });
 
-      // ── Trust row ─────────────────────────────────────────
-      ScrollTrigger.batch('.gs-trust-item', {
-        onEnter: (els) => {
-          gsap.from(els, {
-            opacity: 0, y: 30, duration: 0.5, stagger: 0.1, ease: 'power2.out'
+      // Bundle section
+      ScrollTrigger.create({
+        trigger: '.gs-bundle-section',
+        start: 'top 82%',
+        onEnter: () => {
+          gsap.from('.gs-bundle-left > *', {
+            opacity: 0, y: 32,
+            duration: 0.65, stagger: 0.12,
+            ease: 'power2.out',
+          });
+          gsap.from('.gs-bundle-card-preview', {
+            opacity: 0, x: 36,
+            duration: 0.8,
+            ease: 'power2.out',
           });
         },
-        start: 'top 88%',
         once: true,
       });
 
-      // ── CTA section ───────────────────────────────────────
+      // CTA section
       ScrollTrigger.create({
         trigger: '.gs-cta-section',
-        start: 'top 85%',
+        start: 'top 84%',
         onEnter: () => {
-          gsap.from('.gs-cta-inner', { opacity: 0, y: 40, duration: 0.7, ease: 'power2.out' });
+          gsap.from('.gs-cta-inner > *', {
+            opacity: 0, y: 36,
+            duration: 0.7, stagger: 0.13,
+            ease: 'power2.out',
+          });
         },
         once: true,
       });
@@ -211,6 +495,10 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.heroEl) {
+      this.heroEl.removeEventListener('mousemove', this.heroMouseMove);
+      this.heroEl.removeEventListener('mouseleave', this.heroMouseLeave);
+    }
     if (this.gsapCtx) this.gsapCtx.revert();
     if (isPlatformBrowser(this.platformId)) {
       ScrollTrigger.getAll().forEach(t => t.kill());

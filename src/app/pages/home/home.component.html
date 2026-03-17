@@ -21,37 +21,122 @@
 
 <!-- HERO -->
 <section class="gs-hero">
-  <div class="gs-hero-left">
-    <div class="gs-live-badge">
-      <span class="gs-live-dot"></span>
-      LIVE RANKINGS — Updated Daily from Olive Young Seoul
-    </div>
-    <h1 class="gs-hero-title">
-      <span class="line">Korea's Top 12</span>
-      <span class="line gs-title-accent">K-Beauty</span>
-      <span class="line">Products</span>
-    </h1>
-    <p class="gs-hero-sub">
-      Real bestseller data from Olive Young — Korea's #1 beauty retailer.
-      These are the exact products flying off shelves in Seoul right now.
-    </p>
-    <div class="gs-hero-ctas">
-      <a [routerLink]="['/shop']" class="gs-btn-primary">Shop All 12 →</a>
-      <a href="#rankings" class="gs-btn-ghost">See the Rankings</a>
-    </div>
-    <div class="gs-hero-stats">
-      <span>🇰🇷 Sourced from Seoul</span>
-      <span>📊 Real Sales Data</span>
-      <span>🔄 Updated Daily</span>
-    </div>
+
+  <!-- ── Soft radial background glow ── -->
+  <div class="gs-hero-bg-glow" aria-hidden="true"></div>
+
+  <!-- ── Decorative sparkle particles ── -->
+  <div class="gs-particles" aria-hidden="true">
+    <span class="gs-particle gs-p1">✦</span>
+    <span class="gs-particle gs-p2">✦</span>
+    <span class="gs-particle gs-p3">·</span>
+    <span class="gs-particle gs-p4">✦</span>
+    <span class="gs-particle gs-p5">·</span>
+    <span class="gs-particle gs-p6">✦</span>
+    <span class="gs-particle gs-p7">·</span>
+    <span class="gs-particle gs-p8">✦</span>
   </div>
-  <div class="gs-hero-right">
-    <div class="gs-hero-img-wrap">
-      <img [src]="featuredProduct.image" [alt]="featuredProduct.name" class="gs-hero-img" />
-      <div class="gs-hero-rank-badge">#1</div>
-      <div class="gs-hero-brand-tag">{{ featuredProduct.brand }}</div>
-    </div>
+
+  <!-- ── Thin gold top-border accent line ── -->
+  <div class="gs-hero-topline" aria-hidden="true"></div>
+
+  <!-- ── Hero content grid ── -->
+  <div class="gs-hero-inner">
+
+    <!-- LEFT: Copy -->
+    <div class="gs-hero-left">
+
+      <div class="gs-eyebrow-wrap">
+        <span class="gs-eyebrow-line"></span>
+        <span class="gs-eyebrow-text">OLIVE YOUNG LIVE RANKINGS</span>
+        <span class="gs-live-dot"></span>
+      </div>
+
+      <h1 class="gs-hero-title">
+        <span class="line">Korea's Most</span>
+        <span class="line gs-title-serif-italic">Coveted</span>
+        <span class="line">K-Beauty Ritual</span>
+      </h1>
+
+      <p class="gs-hero-sub">
+        Real bestseller data from Olive Young — Korea's #1 beauty retailer.
+        The exact products flying off shelves in Seoul, delivered to you.
+      </p>
+
+      <div class="gs-hero-ctas">
+        <a [routerLink]="['/shop']" class="gs-btn-primary">Shop All 12 →</a>
+        <a href="#rankings" class="gs-btn-ghost">View Rankings</a>
+      </div>
+
+      <div class="gs-hero-trust">
+        <div class="gs-trust-pill">
+          <span class="gs-trust-icon-sm">🇰🇷</span>
+          <span>Seoul Sourced</span>
+        </div>
+        <div class="gs-trust-pill">
+          <span class="gs-trust-icon-sm">📊</span>
+          <span>Real Sales Data</span>
+        </div>
+        <div class="gs-trust-pill">
+          <span class="gs-trust-icon-sm">💎</span>
+          <span>100% Authentic</span>
+        </div>
+      </div>
+
+    </div><!-- /.gs-hero-left -->
+
+    <!-- RIGHT: Product visual -->
+    <div class="gs-hero-right">
+
+      <!-- Parallax scroll wrapper -->
+      <div class="gs-hero-img-parallax">
+        <!-- Float loop wrapper -->
+        <div class="gs-hero-img-float">
+
+          <!-- Glassmorphism card — top left of image -->
+          <div class="gs-glass-card gs-glass-card--tl">
+            <span class="gs-glass-icon">✦</span>
+            <div class="gs-glass-label">Hydration Boost</div>
+            <div class="gs-glass-sub">24-hr moisture lock</div>
+          </div>
+
+          <!-- Glassmorphism card — bottom right of image -->
+          <div class="gs-glass-card gs-glass-card--br">
+            <span class="gs-glass-icon">◈</span>
+            <div class="gs-glass-label">Nightly Repair</div>
+            <div class="gs-glass-sub">While you sleep</div>
+          </div>
+
+          <!-- Glassmorphism pill — top right -->
+          <div class="gs-glass-pill gs-glass-pill--tr">
+            <span class="gs-rank-num">#1</span>
+            <span class="gs-rank-label">Best&nbsp;Seller</span>
+          </div>
+
+          <!-- Main hero product image -->
+          <div class="gs-hero-img-wrap">
+            <img src="/hero-main.webp"
+                 alt="Korea's top K-beauty products — Laneige Sleeping Mask with camellia roses and ginseng"
+                 class="gs-hero-img"
+                 fetchpriority="high"
+                 decoding="async" />
+            <!-- Soft glow bloom behind image -->
+            <div class="gs-img-glow" aria-hidden="true"></div>
+          </div>
+
+        </div><!-- /.gs-hero-img-float -->
+      </div><!-- /.gs-hero-img-parallax -->
+
+    </div><!-- /.gs-hero-right -->
+
+  </div><!-- /.gs-hero-inner -->
+
+  <!-- ── Bottom scroll cue ── -->
+  <div class="gs-scroll-cue" aria-hidden="true">
+    <span class="gs-scroll-line"></span>
+    <span class="gs-scroll-text">Scroll</span>
   </div>
+
 </section>
 
 <!-- MARQUEE -->

@@ -1,8 +1,7 @@
+# ── PRE-LAUNCH: block all crawlers until the site has a real domain ──────────
+# TODO: When ready to launch, replace Disallow: / with Disallow: (empty line)
+#       and update the Sitemap URL to your real domain.
 User-agent: *
-Allow: /
+Disallow: /
 
-# TODO: Block any admin or staging paths
-# Disallow: /admin/
-
-# TODO: Update with your real domain
-Sitemap: https://YOUR_DOMAIN.com/sitemap.xml
+Sitemap: https://glow-seoul--glow-seoul.us-central1.hosted.app/sitemap.xml

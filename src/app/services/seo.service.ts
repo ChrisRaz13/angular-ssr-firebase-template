@@ -28,8 +28,7 @@ export interface SeoConfig {
   };
 }
 
-// TODO: Replace with your production domain
-const BASE_URL      = 'https://YOUR_DOMAIN_HERE.com';
+const BASE_URL      = 'https://glow-seoul--glow-seoul.us-central1.hosted.app';
 const DEFAULT_IMAGE = `${BASE_URL}/og-default.jpg`;
 
 // TODO: Update these dimensions if you use a different OG image
@@ -113,7 +112,10 @@ export class SeoService {
   }
 
   private setupRobotsTag(): void {
-    this.meta.updateTag({ name: 'robots', content: 'index, follow' });
+    // ── PRE-LAUNCH: block all indexing until the site is ready ──────────────
+    // TODO: Change to 'index, follow' when you have a real domain and are
+    //       ready for Google to start crawling the site.
+    this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow' });
   }
 
   setPageSEO(pageType: string, custom?: Partial<SeoConfig>): void {

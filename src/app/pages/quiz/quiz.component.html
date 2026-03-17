@@ -191,7 +191,7 @@
         <p class="bundle-subtitle">Complete routine built for your skin — swipe through each step</p>
 
         <div class="bundle-carousel-outer">
-          <button class="bundle-arrow bundle-prev" (click)="prevStep()" [class.disabled]="routineIdx===0">←</button>
+          <button class="bundle-arrow bundle-prev" (click)="prevStep()" [class.disabled]="routineIdx===0" aria-label="Previous step">←</button>
           <div class="bundle-viewport">
             <div class="bundle-track">
               <div class="bundle-step-card" *ngFor="let s of currentRoutine">
@@ -212,13 +212,14 @@
               </div>
             </div>
           </div>
-          <button class="bundle-arrow bundle-next" (click)="nextStep()" [class.disabled]="routineIdx===4">→</button>
+          <button class="bundle-arrow bundle-next" (click)="nextStep()" [class.disabled]="routineIdx===4" aria-label="Next step">→</button>
         </div>
 
         <div class="bundle-dots">
           <button *ngFor="let d of stepDots; let i=index"
                   class="bundle-dot" [class.active]="i===routineIdx"
-                  (click)="goToStepDot(i)"></button>
+                  (click)="goToStepDot(i)"
+                  [attr.aria-label]="'Go to routine step ' + (i+1)"></button>
         </div>
 
         <div class="bundle-footer">
